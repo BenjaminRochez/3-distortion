@@ -25,8 +25,11 @@ void main() {
   //https://youtu.be/5zuyptdjnmA?t=1589
   float mySuperDuperProgress = min(2.*progress, 2.*(1. - progress));
   float zOffset = 2.;
-  float zprogress = clamp(2.*progress, 0., 1.);
+  float zprogress = mix(clamp(2.*progress, 0., 1.), clamp(1. - 2. * (1. - progress), 0., 1.), direction);
   pos.z += zOffset*(stickEffect * mySuperDuperProgress - zprogress);
+
+  // wave efefct
+  pos.z += progress * sin(distance * 10. + 2. * time)*0.1;
 
   vUv = uv;
   gl_Position = projectionMatrix * modelViewMatrix * vec4( pos, 1.0 );
