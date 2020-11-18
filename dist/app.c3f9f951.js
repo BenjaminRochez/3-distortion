@@ -36626,7 +36626,7 @@ if (typeof __THREE_DEVTOOLS__ !== 'undefined') {
 },{}],"js/shader/fragment.glsl":[function(require,module,exports) {
 module.exports = "#define GLSLIFY 1\nuniform float time;\nuniform float progress;\nuniform sampler2D tex;\nuniform sampler2D texture2;\nuniform vec4 resolution;\nvarying vec2 vUv;\nvarying vec3 vPosition;\nfloat PI = 3.141592653589793238;\nvoid main()\t{\n\tvec2 newUV = (vUv - vec2(0.5))*resolution.zw + vec2(0.5);\n\tvec4 color = texture2D(tex, newUV);\n\tgl_FragColor = vec4(vUv,0.0,1.);\n\tgl_FragColor = color;\n\tgl_FragColor = vec4(progress, 0., 0., 1.);\n}  ";
 },{}],"js/shader/vertex.glsl":[function(require,module,exports) {
-module.exports = "#define GLSLIFY 1\nuniform float time;\nuniform float progress;\nvarying vec2 vUv;\nvarying vec3 vPosition;\nuniform vec2 pixels;\nfloat PI = 3.141592653589793238;\nvoid main() {\n  vec3 pos = position;\n\n  //pos.z = 0.1*sin(pos.x*10.);\n\n  // distance between the point and the center\n  float distance = length(uv - vec2(0.5));\n  //length of the vertex\n  float maxdist = length(vec2(0.5));\n  //normalization\n  float normalizedDistance = distance/maxdist;\n\n  float stickTo = normalizedDistance;\n\n  //https://youtu.be/5zuyptdjnmA?t=1589\n  float mySuperDuperProgress = min(2.*progress, 2.*(1. - progress));\n  float zOffset = 2.;\n  float zprogress = clamp(2.*progress, 0., 1.);\n  pos.z += zOffset*(stickTo * mySuperDuperProgress - zprogress);\n\n  vUv = uv;\n  gl_Position = projectionMatrix * modelViewMatrix * vec4( pos, 1.0 );\n}";
+module.exports = "#define GLSLIFY 1\nuniform float time;\nuniform float progress;\nuniform float direction;\nvarying vec2 vUv;\nvarying vec3 vPosition;\nuniform vec2 pixels;\nfloat PI = 3.141592653589793238;\nvoid main() {\n  vec3 pos = position;\n\n  //pos.z = 0.1*sin(pos.x*10.);\n\n  // distance between the point and the center\n  float distance = length(uv - vec2(0.5));\n  //length of the vertex\n  float maxdist = length(vec2(0.5));\n  //normalization\n  float normalizedDistance = distance/maxdist;\n\n  float stickTo = normalizedDistance;\n  float stickOut = -normalizedDistance;\n\n  float stickEffect = mix(stickTo, stickOut, direction);\n\n  //https://youtu.be/5zuyptdjnmA?t=1589\n  float mySuperDuperProgress = min(2.*progress, 2.*(1. - progress));\n  float zOffset = 2.;\n  float zprogress = clamp(2.*progress, 0., 1.);\n  pos.z += zOffset*(stickEffect * mySuperDuperProgress - zprogress);\n\n  vUv = uv;\n  gl_Position = projectionMatrix * modelViewMatrix * vec4( pos, 1.0 );\n}";
 },{}],"img.jpg":[function(require,module,exports) {
 module.exports = "/img.81050c0a.jpg";
 },{}],"node_modules/gsap/gsap-core.js":[function(require,module,exports) {
@@ -43184,12 +43184,16 @@ var Sketch = /*#__PURE__*/function () {
       var _this = this;
 
       document.addEventListener('mousedown', function () {
+        _this.material.uniforms.direction.value = 0;
+
         _gsap.default.to(_this.material.uniforms.progress, {
           value: 1,
           duration: 0.5
         });
       });
       document.addEventListener('mouseup', function () {
+        _this.material.uniforms.direction.value = 1;
+
         _gsap.default.to(_this.material.uniforms.progress, {
           value: 0,
           duration: 0.5
@@ -43207,6 +43211,10 @@ var Sketch = /*#__PURE__*/function () {
         side: THREE.DoubleSide,
         uniforms: {
           time: {
+            type: "f",
+            value: 0
+          },
+          direction: {
             type: "f",
             value: 0
           },
@@ -43294,7 +43302,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "61725" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "53349" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

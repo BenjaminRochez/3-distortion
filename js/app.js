@@ -97,6 +97,7 @@ export default class Sketch {
 
   mouseEvents(){
     document.addEventListener('mousedown', ()=> {
+      this.material.uniforms.direction.value = 0;
       gsap.to(this.material.uniforms.progress, {
         value: 1,
         duration: 0.5
@@ -104,6 +105,7 @@ export default class Sketch {
     });
 
     document.addEventListener('mouseup', () => {
+      this.material.uniforms.direction.value = 1;
       gsap.to(this.material.uniforms.progress, {
         value: 0,
         duration: 0.5
@@ -121,6 +123,7 @@ export default class Sketch {
       side: THREE.DoubleSide,
       uniforms: {
         time: { type: "f", value: 0 },
+        direction: { type: "f", value: 0 },
         progress: {type: "f", value: 0},
         tex: {type: "t", value: new THREE.TextureLoader().load(img)},
         resolution: { type: "v4", value: new THREE.Vector4() },

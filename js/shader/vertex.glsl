@@ -1,5 +1,6 @@
 uniform float time;
 uniform float progress;
+uniform float direction;
 varying vec2 vUv;
 varying vec3 vPosition;
 uniform vec2 pixels;
@@ -17,12 +18,15 @@ void main() {
   float normalizedDistance = distance/maxdist;
 
   float stickTo = normalizedDistance;
+  float stickOut = -normalizedDistance;
+
+  float stickEffect = mix(stickTo, stickOut, direction);
 
   //https://youtu.be/5zuyptdjnmA?t=1589
   float mySuperDuperProgress = min(2.*progress, 2.*(1. - progress));
   float zOffset = 2.;
   float zprogress = clamp(2.*progress, 0., 1.);
-  pos.z += zOffset*(stickTo * mySuperDuperProgress - zprogress);
+  pos.z += zOffset*(stickEffect * mySuperDuperProgress - zprogress);
 
   vUv = uv;
   gl_Position = projectionMatrix * modelViewMatrix * vec4( pos, 1.0 );
