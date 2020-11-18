@@ -2,6 +2,7 @@ import * as THREE from "three";
 import fragment from "./shader/fragment.glsl";
 import vertex from "./shader/vertex.glsl";
 import img from '../img.jpg'
+import gsap from 'gsap';
 let OrbitControls = require("three-orbit-controls")(THREE);
 
 export default class Sketch {
@@ -38,6 +39,7 @@ export default class Sketch {
     this.addObjects();
     this.resize();
     this.render();
+    this.mouseEvents();
     this.setupResize();
     // this.settings();
   }
@@ -93,6 +95,23 @@ export default class Sketch {
     this.camera.updateProjectionMatrix();
   }
 
+  mouseEvents(){
+    document.addEventListener('mousedown', ()=> {
+      gsap.to(this.material.uniforms.progress, {
+        value: 1,
+        duration: 0.5
+      })
+    });
+
+    document.addEventListener('mouseup', () => {
+      gsap.to(this.material.uniforms.progress, {
+        value: 0,
+        duration: 0.5
+      })
+    });
+
+  }
+
   addObjects() {
     let that = this;
     this.material = new THREE.ShaderMaterial({
@@ -102,6 +121,7 @@ export default class Sketch {
       side: THREE.DoubleSide,
       uniforms: {
         time: { type: "f", value: 0 },
+        progress: {type: "f", value: 0},
         tex: {type: "t", value: new THREE.TextureLoader().load(img)},
         resolution: { type: "v4", value: new THREE.Vector4() },
         uvRate1: {
@@ -114,12 +134,13 @@ export default class Sketch {
       fragmentShader: fragment
     });
 
-    this.geometry = new THREE.PlaneGeometry(1, 1, 10, 10);
+    this.geometry = new THREE.PlaneGeometry(1, 1, 100, 100);
 
     this.plane = new THREE.Mesh(this.geometry, this.material);
     this.scene.add(this.plane);
   }
-
+  
+  
   stop() {
     this.isPlaying = false;
   }
