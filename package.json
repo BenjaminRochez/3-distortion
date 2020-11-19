@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "gsap": "^3.5.1",
+    "simple-input-events": "^2.0.0",
     "three": "^0.122.0",
     "three-orbit-controls": "^82.1.0"
   },

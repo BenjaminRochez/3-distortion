@@ -5,6 +5,9 @@ import img from '../img.jpg'
 import gsap from 'gsap';
 let OrbitControls = require("three-orbit-controls")(THREE);
 
+const createInputEvents = require('simple-input-events');
+const event = createInputEvents(window);
+
 export default class Sketch {
   constructor(options) {
     this.scene = new THREE.Scene();
@@ -35,12 +38,16 @@ export default class Sketch {
     this.time = 0;
 
     this.isPlaying = true;
-    
+    this.mouse = new THREE.Vector2();
+    this.prevMouse = new THREE.Vector2();
+    this.targetSpeed = 0;
     this.addObjects();
     this.resize();
     this.render();
     this.mouseEvents();
+    this.mouseMoveEvent();
     this.setupResize();
+    
     // this.settings();
   }
 
@@ -51,6 +58,26 @@ export default class Sketch {
     };
     this.gui = new dat.GUI();
     this.gui.add(this.settings, "progress", 0, 1, 0.01);
+  }
+
+  mouseMoveEvent(){
+    event.on('move', ({ position, event, inside, dragding}) =>{
+      console.log(position);
+      this.mouse.x = position[0]/this.width;
+      this.mouse.y = 1. - position[1]/this.height;
+      this.material.uniforms.mouse.value = this.mouse; 
+    });
+  }
+
+  getSpeed(){
+    this.speed = Math.sqrt(
+      (this.prevMouse.x - this.mouse.x)**2 +
+      (this.prevMouse.y - this.mouse.y)**2
+    )
+    this.targetSpeed += 0.1*(this.speed - this.targetSpeed);
+    console.log(this.speed);
+    this.prevMouse.x = this.mouse.x;
+    this.prevMouse.y = this.mouse.y;
   }
 
   setupResize() {
@@ -97,6 +124,7 @@ export default class Sketch {
 
   mouseEvents(){
     document.addEventListener('mousedown', ()=> {
+      console.log('mousedown');
       this.material.uniforms.direction.value = 0;
       gsap.to(this.material.uniforms.progress, {
         value: 1,
@@ -123,7 +151,9 @@ export default class Sketch {
       side: THREE.DoubleSide,
       uniforms: {
         time: { type: "f", value: 0 },
+        mouse: { type: "v2", value: new THREE.Vector2(0.0, 0.0) },
         direction: { type: "f", value: 0 },
+        speed: { type: "f", value: 0 },
         progress: {type: "f", value: 0},
         tex: {type: "t", value: new THREE.TextureLoader().load(img)},
         resolution: { type: "v4", value: new THREE.Vector4() },
@@ -158,7 +188,9 @@ export default class Sketch {
   render() {
     if (!this.isPlaying) return;
     this.time += 0.05;
+    this.getSpeed();
     this.material.uniforms.time.value = this.time;
+    this.material.uniforms.speed.value = this.targetSpeed;
     requestAnimationFrame(this.render.bind(this));
     this.renderer.render(this.scene, this.camera);
   }
